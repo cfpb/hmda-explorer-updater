@@ -351,7 +351,7 @@ db.hmda_lar.aggregate([
                   0
               ]
           }
-      },
+      }
   }},
   { $out: "hmda_lar_by_state" }
 ]);

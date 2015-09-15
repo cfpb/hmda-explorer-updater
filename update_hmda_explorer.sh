@@ -164,14 +164,14 @@ mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MO
 check $?
 
 start "Exporting the new GIS-ified collection"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_geo --jsonArray | jq '{"type": "FeatureCollection", "features": map({type: .type, geometry: .geometry, properties: .properties})}' --compact-output > output/hmda_lar_geo.json
+mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_geo --jsonArray | jq '{"type": "FeatureCollection", "features": map({type: .type, geometry: .geometry, properties: .properties})}' --compact-output > input/tmp/hmda_lar_geo.json
 check $?
 
-if [ -f output/hmda_lar_geo.json ]; then
+if [ -f input/tmp/hmda_lar_geo.json ]; then
   # Copy over TileMill base projects
   cp -r input/tilemill_projects output/
   # Copy the generated GeoJSON file into each project dir.
-  ls output/tilemill_projects/ | xargs -n 1 -I project_dir cp output/hmda_lar_geo.json output/tilemill_projects/project_dir
+  ls output/tilemill_projects/ | xargs -n 1 -I project_dir cp input/tmp/hmda_lar_geo.json output/tilemill_projects/project_dir
   println_normal "TileMill project files have been successfully generated!"
 else
   println_alert "'hmda_lar_geo.json' was not successfully created. Something went wrong!"
@@ -192,7 +192,27 @@ mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p
 check $?
 
 start "Exporting the JSON for chart #2"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map(select(.state_name != null) | {(.state_name): {name: (.state_name), data: [[.conv12/.purchases12*100, .conv13/.purchases13*100, .conv14/.purchases14*100], [.fha12/.purchases12*100, .fha13/.purchases13*100, .fha14/.purchases14*100], [.va12/.purchases12*100, .va13/.purchases13*100, .va14/.purchases14*100], [.rhs12/.purchases12*100, .rhs13/.purchases13*100, .rhs14/.purchases14*100]]}})' > input/tmp/chart2.js
+mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map({(.state_name): {name: (.state_name), data: [[.conv12/.purchases12*100, .conv13/.purchases13*100, .conv14/.purchases14*100], [.fha12/.purchases12*100, .fha13/.purchases13*100, .fha14/.purchases14*100], [.va12/.purchases12*100, .va13/.purchases13*100, .va14/.purchases14*100], [.rhs12/.purchases12*100, .rhs13/.purchases13*100, .rhs14/.purchases14*100]]}})' > input/tmp/chart2.js
+check $?
+
+start "Exporting percentage totals for chart #2"
+mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray \
+  | jq '
+  {
+  percentConv2012: (map(.) | (reduce .[] as $state (0; . + $state.conv12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
+  percentFHA2012: (map(.) | (reduce .[] as $state (0; . + $state.fha12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
+  percentVA2012: (map(.) | (reduce .[] as $state (0; . + $state.va12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
+  percentRHS2012: (map(.) | (reduce .[] as $state (0; . + $state.rhs12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
+  percentConv2013: (map(.) | (reduce .[] as $state (0; . + $state.conv13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
+  percentFHA2013: (map(.) | (reduce .[] as $state (0; . + $state.fha13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
+  percentVA2013: (map(.) | (reduce .[] as $state (0; . + $state.va13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
+  percentRHS2013: (map(.) | (reduce .[] as $state (0; . + $state.rhs13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
+  percentConv2014: (map(.) | (reduce .[] as $state (0; . + $state.conv14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
+  percentFHA2014: (map(.) | (reduce .[] as $state (0; . + $state.fha14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
+  percentVA2014: (map(.) | (reduce .[] as $state (0; . + $state.va14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
+  percentRHS2014: (map(.) | (reduce .[] as $state (0; . + $state.rhs14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100)
+  }
+  ' > input/tmp/chart2-total.js
 check $?
 
 start "Processing the JSON for both charts"

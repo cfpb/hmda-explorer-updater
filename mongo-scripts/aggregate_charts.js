@@ -1,12 +1,13 @@
 var fs = require('fs'),
     chart1 = JSON.parse(fs.readFileSync('./input/tmp/chart1.js', 'utf8')),
-    chart2 = JSON.parse(fs.readFileSync('./input/tmp/chart2.js', 'utf8'));
+    chart2 = JSON.parse(fs.readFileSync('./input/tmp/chart2.js', 'utf8')),
+    chart2total = JSON.parse(fs.readFileSync('./input/tmp/chart2-total.js', 'utf8'));
 
 function processChart(chartData, avg) {
   var summary = [],
       output = {},
-      numParameters = chartData[0].Alabama.data.length,
-      numValues = chartData[0].Alabama.data[0].length;
+      numParameters = chartData[1].Alabama.data.length,
+      numValues = chartData[1].Alabama.data[0].length;
 
   while(numParameters--) {
     summary.push([]);
@@ -30,15 +31,17 @@ function processChart(chartData, avg) {
   });
 
   // Chart #2 is percentages so we need to average the state's values instead of
-  // adding them all together.
+  // adding them all together. We did this earlier with jq.
   if (avg) {
-    summary.forEach(function(v, i) {
-      v.forEach(function(w, j, arr) {
-        arr[j] = w / chartData.length;
-      });
-    });
+    summary = [
+      [chart2total.percentConv2012, chart2total.percentConv2013, chart2total.percentConv2014],
+      [chart2total.percentFHA2012, chart2total.percentFHA2013, chart2total.percentFHA2014],
+      [chart2total.percentVA2012, chart2total.percentVA2013, chart2total.percentVA2014],
+      [chart2total.percentRHS2012, chart2total.percentRHS2013, chart2total.percentRHS2014]
+    ];
   }
 
+  // Add U.S. Total
   chartData.unshift({'U.S. Total': {name:'U.S. Total', data:summary}});
 
   chartData.forEach(function(v, i) {
@@ -47,6 +50,9 @@ function processChart(chartData, avg) {
       output[state] = v[state];
     }
   });
+
+  // Remove N/A records
+  delete output.NA;
 
   return JSON.stringify(output);
 }
