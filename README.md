@@ -42,7 +42,25 @@ export MONGO_DEV_USERNAME=gracehopper
 export MONGO_DEV_PASSWORD=p@ssw0rd
 ```
 
-## Usage
+## Get the Population updates from the Census
+
+- Go to the [Census Fact Finder site](http://factfinder.census.gov/bkmk/table/1.0/en/PEP/2015/PEPANNRES/0100000US.05000.004)
+  - You may need to add/change geographies to get the current year's data
+  - You may need to update the URL to get to the correct data set
+- Click `download`
+  - Choose `data and annotations in a single file`
+- Save and unzip in the `input/census_data` directory
+
+## Update the window of years
+The original window for this repo was 2012-2014. The next update changed the window to 2013-2015. Here is a helpful checklist of place to make the changes
+- [ ] `mongo-scripts/aggregate_charts.js`
+- [ ] `mongo-scripts/hmda_group_by_county-compressed.js`
+- [ ] `mongo-scripts/hmda_group_by_county.js`
+- [ ] `mongo-scripts/hmda_group_by_state-compressed.js`
+- [ ] `mongo-scripts/hmda_group_by_state.js`
+- [ ] `update_hmda_explorer.sh`
+
+## Run the update
 
 ```sh
 ./update_hmda_explorer.sh

@@ -113,7 +113,7 @@ curl -s "http://api.census.gov/data/2010/sf1?key=$CENSUS_API_KEY&get=P0010001,NA
 check $?
 
 start "Processing county population data from the census"
-iconv --from-code iso-8859-1 input/census_data/PEP_2014_PEPANNRES/PEP_2014_PEPANNRES_with_ann.csv | jq --slurp --raw-input 'split("\n") | .[2:] | map(split(",")) | map({state_code: .[0][9:11], county_code: .[0][11:], county_name: (.[2]|ltrimstr("\"")), state_name: (.[3]|rtrimstr("\"")|ltrimstr(" ")), population: (.[10]|rtrimstr("\r"))})' > input/tmp/county-populations.json
+iconv --from-code iso-8859-1 input/census_data/PEP_2015_PEPANNRES/PEP_2015_PEPANNRES_with_ann.csv | jq --slurp --raw-input 'split("\n") | .[2:] | map(split(",")) | map({state_code: .[0][9:11], county_code: .[0][11:], county_name: (.[2]|ltrimstr("\"")), state_name: (.[3]|rtrimstr("\"")|ltrimstr(" ")), population: (.[11]|rtrimstr("\r"))})' > input/tmp/county-populations.json
 check $?
 
 start "Importing state population data into new 'state_populations' collection"
@@ -139,16 +139,16 @@ check $?
 # Now that you have a comprehensive `hmda_lar_by_county` collection, let's integrate the county shapefiles.
 
 start "Downloading and unzipping county shapefiles from the Census"
-curl -s http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_county_500k.zip | tar -xf- -C input/tmp
+curl -s http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_county_500k.zip | tar -xf- -C input/tmp
 check $?
 
 start "Converting the census' shapefile into a GeoJSON file"
-rm -f input/tmp/cb_2014_us_county_500k.json
-ogr2ogr -f 'GeoJSON' input/tmp/cb_2014_us_county_500k.json input/tmp/cb_2014_us_county_500k.shp
+rm -f input/tmp/cb_2015_us_county_500k.json
+ogr2ogr -f 'GeoJSON' input/tmp/cb_2015_us_county_500k.json input/tmp/cb_2015_us_county_500k.shp
 check $?
 
 start "Cleaning up the GeoJSON file"
-cat input/tmp/cb_2014_us_county_500k.json | jq '.features' --compact-output > input/tmp/counties_geojson.json
+cat input/tmp/cb_2015_us_county_500k.json | jq '.features' --compact-output > input/tmp/counties_geojson.json
 check $?
 
 start "Importing the new 'counties_geojson.json' into a 'county_shapes' collection"
@@ -188,21 +188,17 @@ mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MO
 check $?
 
 start "Exporting the JSON for chart #1"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map({(.state_name): {name: (.state_name), data: [[.purchases12, .purchases13, .purchases14], [.refinances12, .refinances13, .refinances14], [.improvements12, .improvements13, .improvements14]]}})' > input/tmp/chart1.js
+mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map({(.state_name): {name: (.state_name), data: [[.purchases13, .purchases14, .purchases15], [.refinances13, .refinances14, .refinances15], [.improvements13, .improvements14, .improvements15]]}})' > input/tmp/chart1.js
 check $?
 
 start "Exporting the JSON for chart #2"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map({(.state_name): {name: (.state_name), data: [[.conv12/.purchases12*100, .conv13/.purchases13*100, .conv14/.purchases14*100], [.fha12/.purchases12*100, .fha13/.purchases13*100, .fha14/.purchases14*100], [.va12/.purchases12*100, .va13/.purchases13*100, .va14/.purchases14*100], [.rhs12/.purchases12*100, .rhs13/.purchases13*100, .rhs14/.purchases14*100]]}})' > input/tmp/chart2.js
+mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map({(.state_name): {name: (.state_name), data: [[.conv13/.purchases13*100, .conv14/.purchases14*100, .conv15/.purchases15*100], [.fha13/.purchases13*100, .fha14/.purchases14*100, .fha15/.purchases15*100], [.va13/.purchases13*100, .va14/.purchases14*100, .va15/.purchases15*100], [.rhs13/.purchases13*100, .rhs14/.purchases14*100, .rhs15/.purchases15*100]]}})' > input/tmp/chart2.js
 check $?
 
 start "Exporting percentage totals for chart #2"
 mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray \
   | jq '
   {
-  percentConv2012: (map(.) | (reduce .[] as $state (0; . + $state.conv12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
-  percentFHA2012: (map(.) | (reduce .[] as $state (0; . + $state.fha12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
-  percentVA2012: (map(.) | (reduce .[] as $state (0; . + $state.va12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
-  percentRHS2012: (map(.) | (reduce .[] as $state (0; . + $state.rhs12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
   percentConv2013: (map(.) | (reduce .[] as $state (0; . + $state.conv13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
   percentFHA2013: (map(.) | (reduce .[] as $state (0; . + $state.fha13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
   percentVA2013: (map(.) | (reduce .[] as $state (0; . + $state.va13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
@@ -210,7 +206,11 @@ mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p
   percentConv2014: (map(.) | (reduce .[] as $state (0; . + $state.conv14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
   percentFHA2014: (map(.) | (reduce .[] as $state (0; . + $state.fha14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
   percentVA2014: (map(.) | (reduce .[] as $state (0; . + $state.va14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentRHS2014: (map(.) | (reduce .[] as $state (0; . + $state.rhs14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100)
+  percentRHS2014: (map(.) | (reduce .[] as $state (0; . + $state.rhs14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
+  percentConv2015: (map(.) | (reduce .[] as $state (0; . + $state.conv15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100),
+  percentFHA2015: (map(.) | (reduce .[] as $state (0; . + $state.fha15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100),
+  percentVA2015: (map(.) | (reduce .[] as $state (0; . + $state.va15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100),
+  percentRHS2015: (map(.) | (reduce .[] as $state (0; . + $state.rhs15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100)
   }
   ' > input/tmp/chart2-total.js
 check $?
