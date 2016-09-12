@@ -84,7 +84,7 @@ int_handler(){
 trap 'int_handler' INT
 
 function start {
-  echo -n "  $1... "
+  echo -n $(date +"%R - $1...")
   say "$1"
 }
 
@@ -105,7 +105,7 @@ mkdir -p output
 check $?
 
 start "Grouping HMDA records by county. This will take a few minutes"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/hmda_group_by_county-compressed.js
+mongo --verbose $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/hmda_group_by_county-compressed.js
 check $?
 
 start "Downloading and processing state population data from the census"
@@ -199,18 +199,18 @@ start "Exporting percentage totals for chart #2"
 mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray \
   | jq '
   {
-  percentConv2013: (map(.) | (reduce .[] as $state (0; . + $state.conv13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentFHA2013: (map(.) | (reduce .[] as $state (0; . + $state.fha13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentVA2013: (map(.) | (reduce .[] as $state (0; . + $state.va13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentRHS2013: (map(.) | (reduce .[] as $state (0; . + $state.rhs13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentConv2014: (map(.) | (reduce .[] as $state (0; . + $state.conv14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentFHA2014: (map(.) | (reduce .[] as $state (0; . + $state.fha14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentVA2014: (map(.) | (reduce .[] as $state (0; . + $state.va14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentRHS2014: (map(.) | (reduce .[] as $state (0; . + $state.rhs14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentConv2015: (map(.) | (reduce .[] as $state (0; . + $state.conv15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100),
-  percentFHA2015: (map(.) | (reduce .[] as $state (0; . + $state.fha15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100),
-  percentVA2015: (map(.) | (reduce .[] as $state (0; . + $state.va15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100),
-  percentRHS2015: (map(.) | (reduce .[] as $state (0; . + $state.rhs15)) / (reduce .[] as $state (0; . + $state.purchases15)) * 100)
+  percentConvYear0: (map(.) | (reduce .[] as $state (0; . + $state.convYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentFHAYear0: (map(.) | (reduce .[] as $state (0; . + $state.fhaYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentVAYear0: (map(.) | (reduce .[] as $state (0; . + $state.vaYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentRHSYear0: (map(.) | (reduce .[] as $state (0; . + $state.rhsYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentConvYear1: (map(.) | (reduce .[] as $state (0; . + $state.convYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentFHAYear1: (map(.) | (reduce .[] as $state (0; . + $state.fhaYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentVAYear1: (map(.) | (reduce .[] as $state (0; . + $state.vaYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentRHSYear1: (map(.) | (reduce .[] as $state (0; . + $state.rhsYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentConvYear2: (map(.) | (reduce .[] as $state (0; . + $state.convYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100),
+  percentFHAYear2: (map(.) | (reduce .[] as $state (0; . + $state.fhaYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100),
+  percentVAYear2: (map(.) | (reduce .[] as $state (0; . + $state.vaYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100),
+  percentRHSYear2: (map(.) | (reduce .[] as $state (0; . + $state.rhsYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100)
   }
   ' > input/tmp/chart2-total.js
 check $?

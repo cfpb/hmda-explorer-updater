@@ -4,7 +4,7 @@ db.hmda_lar.aggregate([
   // { $limit: 1000000 },
   { "$group": {
       "_id": "$89",
-      "purchases13": {
+      "purchasesYear0": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -20,7 +20,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "improvements13": {
+      "improvementsYear0": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -36,7 +36,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "refinances13": {
+      "refinancesYear0": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -52,7 +52,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "purchases14": {
+      "purchasesYear1": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -68,7 +68,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "improvements14": {
+      "improvementsYear1": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -84,7 +84,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "refinances14": {
+      "refinancesYear1": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -100,7 +100,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "purchases15": {
+      "purchasesYear2": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -116,7 +116,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "improvements15": {
+      "improvementsYear2": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -132,7 +132,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "refinances15": {
+      "refinancesYear2": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -148,7 +148,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "conv13": {
+      "convYear0": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -165,7 +165,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "fha13": {
+      "fhaYear0": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -182,7 +182,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "va13": {
+      "vaYear0": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -199,7 +199,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "rhs13": {
+      "rhsYear0": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -216,7 +216,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "conv14": {
+      "convYear1": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -233,7 +233,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "fha14": {
+      "fhaYear1": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -250,7 +250,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "va14": {
+      "vaYear1": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -267,7 +267,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "rhs14": {
+      "rhsYear1": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -284,7 +284,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "conv15": {
+      "convYear2": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -301,7 +301,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "fha15": {
+      "fhaYear2": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -318,7 +318,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "va15": {
+      "vaYear2": {
           "$sum": {
               "$cond": [
                   { "$and": [
@@ -335,7 +335,7 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "rhs15": {
+      "rhsYear2": {
           "$sum": {
               "$cond": [
                   { "$and": [

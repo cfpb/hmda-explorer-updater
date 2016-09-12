@@ -34,10 +34,10 @@ function processChart(chartData, avg) {
   // adding them all together. We did this earlier with jq.
   if (avg) {
     summary = [
-      [chart2total.percentConv2013, chart2total.percentConv2014, chart2total.percentConv2015],
-      [chart2total.percentFHA2013, chart2total.percentFHA2014, chart2total.percentFHA2015],
-      [chart2total.percentVA2013, chart2total.percentVA2014, chart2total.percentVA2015],
-      [chart2total.percentRHS2013, chart2total.percentRHS2014, chart2total.percentRHS2015]
+      [chart2total.percentConvYear0, chart2total.percentConvYear1, chart2total.percentConvYear2],
+      [chart2total.percentFHAYear0, chart2total.percentFHAYear1, chart2total.percentFHAYear2],
+      [chart2total.percentVAYear0, chart2total.percentVAYear1, chart2total.percentVAYear2],
+      [chart2total.percentRHSYear0, chart2total.percentRHSYear1, chart2total.percentRHSYear2]
     ];
   }
 

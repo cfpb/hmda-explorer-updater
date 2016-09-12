@@ -53,6 +53,11 @@ export MONGO_DEV_PASSWORD=p@ssw0rd
 
 ## Update the window of years
 The original window for this repo was 2012-2014. The next update changed the window to 2013-2015. Here is a helpful checklist of place to make the changes
+- [ ] `input/tilemill_projects/hmda_blank/project.mml`
+- [ ] `input/tilemill_projects/hmda_p_o_y0_y1/project.mml`
+- [ ] `input/tilemill_projects/hmda_p_o_y1_y2/project.mml`
+- [ ] `input/tilemill_projects/hmda_r_o_y0_y1/project.mml`
+- [ ] `input/tilemill_projects/hmda_r_o_y1_y2/project.mml`
 - [ ] `mongo-scripts/aggregate_charts.js`
 - [ ] `mongo-scripts/hmda_group_by_county-compressed.js`
 - [ ] `mongo-scripts/hmda_group_by_county.js`
@@ -79,6 +84,8 @@ It can be pasted directly into [`chart1.js`](https://github.com/cfpb/hmda-explor
 
 `chart2.json` is the key-value pairs used for the second chart on the homepage.
 It can be pasted directly into [`chart2.js`](https://github.com/cfpb/hmda-explorer/blob/b1d1bf9a3cba36fb21fda42e19797c6265642a84/src/static/js/charts/chart2.js#L13-L407).
+
+__Note__ You will also have to change the `xAxis.categories` and `series` data in both of the `chart*_options.js` files
 
 `tilemill_projects` is a directory of TileMill project files designed to be
 copied directly into your TileMill projects directory, making them immediately
