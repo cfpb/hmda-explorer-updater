@@ -27,6 +27,9 @@
 # Abort script if any command fails.
 set -e
 
+# loud or quiet?
+reporting=--quiet
+
 # Colors for terminal highlighting
 color_red=$(tput setaf 1)
 color_green=$(tput setaf 2)
@@ -84,7 +87,7 @@ int_handler(){
 trap 'int_handler' INT
 
 function start {
-  echo -n "  $1... "
+  echo -n $(date +"%R - $1...")
   say "$1"
 }
 
@@ -104,8 +107,8 @@ start "Creating output directory"
 mkdir -p output
 check $?
 
-start "Grouping HMDA records by county. This will take a few minutes"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/hmda_group_by_county-compressed.js
+start "Grouping HMDA records by county. This will take 5 to 10 minutes"
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/hmda_group_by_county-compressed.js
 check $?
 
 start "Downloading and processing state population data from the census"
@@ -113,58 +116,58 @@ curl -s "http://api.census.gov/data/2010/sf1?key=$CENSUS_API_KEY&get=P0010001,NA
 check $?
 
 start "Processing county population data from the census"
-iconv --from-code iso-8859-1 input/census_data/PEP_2014_PEPANNRES/PEP_2014_PEPANNRES_with_ann.csv | jq --slurp --raw-input 'split("\n") | .[2:] | map(split(",")) | map({state_code: .[0][9:11], county_code: .[0][11:], county_name: (.[2]|ltrimstr("\"")), state_name: (.[3]|rtrimstr("\"")|ltrimstr(" ")), population: (.[10]|rtrimstr("\r"))})' > input/tmp/county-populations.json
+iconv --from-code iso-8859-1 input/census_data/PEP_2015_PEPANNRES/PEP_2015_PEPANNRES_with_ann.csv | jq --slurp --raw-input 'split("\n") | .[2:] | map(split(",")) | map({state_code: .[0][9:11], county_code: .[0][11:], county_name: (.[2]|ltrimstr("\"")), state_name: (.[3]|rtrimstr("\"")|ltrimstr(" ")), population: (.[11]|rtrimstr("\r"))})' > input/tmp/county-populations.json
 check $?
 
 start "Importing state population data into new 'state_populations' collection"
-mongoimport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection state_populations --type json --file input/tmp/state-populations.json --jsonArray --drop
+mongoimport $reporting -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection state_populations --type json --file input/tmp/state-populations.json --jsonArray --drop
 check $?
 
 start "Importing county population data into new 'county_populations' collection"
-mongoimport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection county_populations --type json --file input/tmp/county-populations.json --jsonArray --drop
+mongoimport $reporting -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection county_populations --type json --file input/tmp/county-populations.json --jsonArray --drop
 check $?
 
-start "Adding state names to county records. This will take a few minutes"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_state_names_to_counties.js
+start "Adding state names to county records. This will take 5 to 10 minutes"
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_state_names_to_counties.js
 check $?
 
-start "Joining HMDA records with state and county names and populations. This will take a few minutes"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_states_and_counties.js
+start "Joining HMDA records with state and county names and populations. This will take about 10 minutes"
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_states_and_counties.js
 check $?
 
 start "Rounding the percent changes and adding commas to large numbers"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/make_numbers_pretty.js
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/make_numbers_pretty.js
 check $?
 
 # Now that you have a comprehensive `hmda_lar_by_county` collection, let's integrate the county shapefiles.
 
 start "Downloading and unzipping county shapefiles from the Census"
-curl -s http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_county_500k.zip | tar -xf- -C input/tmp
+curl -s http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_county_500k.zip | tar -xf- -C input/tmp
 check $?
 
 start "Converting the census' shapefile into a GeoJSON file"
-rm -f input/tmp/cb_2014_us_county_500k.json
-ogr2ogr -f 'GeoJSON' input/tmp/cb_2014_us_county_500k.json input/tmp/cb_2014_us_county_500k.shp
+rm -f input/tmp/cb_2015_us_county_500k.json
+ogr2ogr -f 'GeoJSON' input/tmp/cb_2015_us_county_500k.json input/tmp/cb_2015_us_county_500k.shp
 check $?
 
 start "Cleaning up the GeoJSON file"
-cat input/tmp/cb_2014_us_county_500k.json | jq '.features' --compact-output > input/tmp/counties_geojson.json
+cat input/tmp/cb_2015_us_county_500k.json | jq '.features' --compact-output > input/tmp/counties_geojson.json
 check $?
 
 start "Importing the new 'counties_geojson.json' into a 'county_shapes' collection"
-mongoimport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection county_shapes --file input/tmp/counties_geojson.json --jsonArray --drop
+mongoimport $reporting -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection county_shapes --file input/tmp/counties_geojson.json --jsonArray --drop
 check $?
 
 start "Creating a 2dsphere spatial index on that new collection"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --eval 'db.county_shapes.ensureIndex({"geometry":"2dsphere"})' | tail -n +2
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --eval 'db.county_shapes.ensureIndex({"geometry":"2dsphere"})' | tail -n +2
 check $?
 
-start "Joining the shapes collection with the HMDA data into a new collection. This will take a few minutes"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_county_shapes.js
+start "Joining the shapes collection with the HMDA data into a new collection. This will take 10 to 20 minutes"
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_county_shapes.js
 check $?
 
 start "Exporting the new GIS-ified collection"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_geo --jsonArray | jq '{"type": "FeatureCollection", "features": map({type: .type, geometry: .geometry, properties: .properties})}' --compact-output > input/tmp/hmda_lar_geo.json
+mongoexport $reporting -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_geo --jsonArray | jq '{"type": "FeatureCollection", "features": map({type: .type, geometry: .geometry, properties: .properties})}' --compact-output > input/tmp/hmda_lar_geo.json
 check $?
 
 if [ -f input/tmp/hmda_lar_geo.json ]; then
@@ -179,38 +182,59 @@ fi
 
 # All done with the map stuff. Now let's generate the JSON for the charts.
 
-start "Grouping HMDA records by state for the charts. This will take a few minutes"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/hmda_group_by_state-compressed.js
+start "Grouping HMDA records by state for the charts. This will take about 5 minutes"
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/hmda_group_by_state-compressed.js
 check $?
 
 start "Add state names to the HMDA chart records"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_state_names_to_charts.js
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin mongo-scripts/add_state_names_to_charts.js
 check $?
 
 start "Exporting the JSON for chart #1"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map({(.state_name): {name: (.state_name), data: [[.purchases12, .purchases13, .purchases14], [.refinances12, .refinances13, .refinances14], [.improvements12, .improvements13, .improvements14]]}})' > input/tmp/chart1.js
+mongoexport $reporting -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map(
+  {
+    (.state_name): {
+      name: (.state_name), data: [
+        [.purchasesYear0, .purchasesYear1, .purchasesYear2],
+        [.refinancesYear0, .refinancesYear1, .refinancesYear2],
+        [.improvementsYear0, .improvementsYear1, .improvementsYear2]
+      ]
+    }
+  }
+)' > input/tmp/chart1.js
 check $?
 
 start "Exporting the JSON for chart #2"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map({(.state_name): {name: (.state_name), data: [[.conv12/.purchases12*100, .conv13/.purchases13*100, .conv14/.purchases14*100], [.fha12/.purchases12*100, .fha13/.purchases13*100, .fha14/.purchases14*100], [.va12/.purchases12*100, .va13/.purchases13*100, .va14/.purchases14*100], [.rhs12/.purchases12*100, .rhs13/.purchases13*100, .rhs14/.purchases14*100]]}})' > input/tmp/chart2.js
+mongoexport $reporting -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray | jq 'map(
+  {
+    (.state_name): {
+      name: (.state_name), data: [
+        [.convYear0/.purchasesYear0*100, .convYear1/.purchasesYear1*100, .convYear2/.purchasesYear2*100], 
+        [.fhaYear0/.purchasesYear0*100, .fhaYear1/.purchasesYear1*100, .fhaYear2/.purchasesYear2*100],
+        [.vaYear0/.purchasesYear0*100, .vaYear1/.purchasesYear1*100, .vaYear2/.purchasesYear2*100],
+        [.rhsYear0/.purchasesYear0*100, .rhsYear1/.purchasesYear1*100, .rhsYear2/.purchasesYear2*100]
+      ]
+    }
+  }
+)' > input/tmp/chart2.js
 check $?
 
 start "Exporting percentage totals for chart #2"
-mongoexport --quiet -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray \
+mongoexport $reporting -h $MONGO_DEV_HOST:$MONGO_DEV_PORT -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --db hmda --collection hmda_lar_by_state --jsonArray \
   | jq '
   {
-  percentConv2012: (map(.) | (reduce .[] as $state (0; . + $state.conv12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
-  percentFHA2012: (map(.) | (reduce .[] as $state (0; . + $state.fha12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
-  percentVA2012: (map(.) | (reduce .[] as $state (0; . + $state.va12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
-  percentRHS2012: (map(.) | (reduce .[] as $state (0; . + $state.rhs12)) / (reduce .[] as $state (0; . + $state.purchases12)) * 100),
-  percentConv2013: (map(.) | (reduce .[] as $state (0; . + $state.conv13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentFHA2013: (map(.) | (reduce .[] as $state (0; . + $state.fha13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentVA2013: (map(.) | (reduce .[] as $state (0; . + $state.va13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentRHS2013: (map(.) | (reduce .[] as $state (0; . + $state.rhs13)) / (reduce .[] as $state (0; . + $state.purchases13)) * 100),
-  percentConv2014: (map(.) | (reduce .[] as $state (0; . + $state.conv14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentFHA2014: (map(.) | (reduce .[] as $state (0; . + $state.fha14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentVA2014: (map(.) | (reduce .[] as $state (0; . + $state.va14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100),
-  percentRHS2014: (map(.) | (reduce .[] as $state (0; . + $state.rhs14)) / (reduce .[] as $state (0; . + $state.purchases14)) * 100)
+  percentConvYear0: (map(.) | (reduce .[] as $state (0; . + $state.convYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentFHAYear0: (map(.) | (reduce .[] as $state (0; . + $state.fhaYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentVAYear0: (map(.) | (reduce .[] as $state (0; . + $state.vaYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentRHSYear0: (map(.) | (reduce .[] as $state (0; . + $state.rhsYear0)) / (reduce .[] as $state (0; . + $state.purchasesYear0)) * 100),
+  percentConvYear1: (map(.) | (reduce .[] as $state (0; . + $state.convYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentFHAYear1: (map(.) | (reduce .[] as $state (0; . + $state.fhaYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentVAYear1: (map(.) | (reduce .[] as $state (0; . + $state.vaYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentRHSYear1: (map(.) | (reduce .[] as $state (0; . + $state.rhsYear1)) / (reduce .[] as $state (0; . + $state.purchasesYear1)) * 100),
+  percentConvYear2: (map(.) | (reduce .[] as $state (0; . + $state.convYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100),
+  percentFHAYear2: (map(.) | (reduce .[] as $state (0; . + $state.fhaYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100),
+  percentVAYear2: (map(.) | (reduce .[] as $state (0; . + $state.vaYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100),
+  percentRHSYear2: (map(.) | (reduce .[] as $state (0; . + $state.rhsYear2)) / (reduce .[] as $state (0; . + $state.purchasesYear2)) * 100)
   }
   ' > input/tmp/chart2-total.js
 check $?
@@ -232,7 +256,7 @@ else
 fi 
 
 start "Dropping all the temporary collections"
-mongo --quiet $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --eval 'db.hmda_lar_by_county.drop();db.hmda_lar_by_state.drop();db.county_populations.drop();db.state_populations.drop();db.county_shapes.drop();db.hmda_lar_geo.drop();' | tail -n +2
+mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p $MONGO_DEV_PASSWORD --authenticationDatabase=admin --eval 'db.hmda_lar_by_county.drop();db.hmda_lar_by_state.drop();db.county_populations.drop();db.state_populations.drop();db.county_shapes.drop();db.hmda_lar_geo.drop();' | tail -n +2
 check $?
 
 start "Deleting tmp directory"
