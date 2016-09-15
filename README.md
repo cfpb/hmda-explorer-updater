@@ -87,10 +87,19 @@ It can be pasted directly into [`chart2.js`](https://github.com/cfpb/hmda-explor
 
 __Note__ You will also have to change the `xAxis.categories` and `series` data in both of the `chart*_options.js` files
 
+## Updating the Maps
+
 `tilemill_projects` is a directory of TileMill project files designed to be
 copied directly into your TileMill projects directory, making them immediately
 configurable through the TileMill GUI. By default, TileMill stores projects in
 `~/Documents/MapBox/project`.
+
+At this point the folders and the `name` attribute inside `project.mml` file should be changed to reflect the release years and conform to the existing naming convention.
+`hmda_r_o_y1_y2` => `hmda_r_o_18_19`
+
+Once the maps have been verified, they can be uploaded to the MapBox site
+
+The new map urls can be updated in [`home.js`](https://github.com/cfpb/hmda-explorer/blob/master/src/static/js/pages/home.js#L37)
 
 ## Known issues
 
