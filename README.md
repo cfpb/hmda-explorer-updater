@@ -11,7 +11,7 @@ These scripts assume you have:
 containing umpteen million HMDA LAR documents.
 - A free [Census API key](http://api.census.gov/data/key_signup.html).
 - GDAL, MongoDB, jq and iconv installed on a *nix machine.
-- [TileMill](https://github.com/mapbox/tilemill) installed locally.
+- ~~[TileMill](https://github.com/mapbox/tilemill)~~ [TileOven](https://github.com/florianf/tileoven) installed locally.
 
 **Note:** These scripts will not do all the work for you. They just automate
 some of the more tedious aspects (notably, the flattening of HMDA LAR data using
@@ -80,10 +80,10 @@ bunch of stuff, and eventually generate two files and a directory to the
 - `output/tilemill_projects`
 
 `chart1.json` is the key-value pairs used for the first chart on the homepage.
-It can be pasted directly into [`chart1.js`](https://github.com/cfpb/hmda-explorer/blob/b1d1bf9a3cba36fb21fda42e19797c6265642a84/src/static/js/charts/chart1.js#L10-L404).
+It can be pasted directly into [`chart1.js`](https://github.com/cfpb/hmda-explorer/blob/master/src/static/js/charts/chart1.js#L10-L64).
 
 `chart2.json` is the key-value pairs used for the second chart on the homepage.
-It can be pasted directly into [`chart2.js`](https://github.com/cfpb/hmda-explorer/blob/b1d1bf9a3cba36fb21fda42e19797c6265642a84/src/static/js/charts/chart2.js#L13-L407).
+It can be pasted directly into [`chart2.js`](https://github.com/cfpb/hmda-explorer/blob/master/src/static/js/charts/chart2.js#L13-L67).
 
 __Note__ You will also have to change the `xAxis.categories` and `series` data in both of the `chart*_options.js` files
 
@@ -97,28 +97,21 @@ configurable through the TileMill GUI. By default, TileMill stores projects in
 At this point the folders and the `name` attribute inside `project.mml` file should be changed to reflect the release years and conform to the existing naming convention.
 `hmda_r_o_y1_y2` => `hmda_r_o_18_19`
 
-Once the maps have been verified, they can be uploaded to the MapBox site
+Launch TileOven and verify the maps
+```shell
+cd ~/path/to/tileoven
+./index.js
+```
+The application is available at [http://localhost:20009/#/](http://localhost:20009/#/)
 
-The new map urls can be updated in [`home.js`](https://github.com/cfpb/hmda-explorer/blob/master/src/static/js/pages/home.js#L37)
+Once the maps have been verified, export an `.mbtiles` file for each of the following projects:
+- [ ] `hmda_blank`
+- [ ] `hmda_p_o_y1_y2`
+- [ ] `hmda_r_o_y1_y2`
 
-## Known issues
+Upload the three `.mbtiles` files to [Mapbox Studio](https://www.mapbox.com/studio/tilesets/)
 
-**These scripts are designed to generate files for the 2014 update of
-hmda-explorer.** Are you trying to update the site with 2015 data? You'll need
-to go through all the mongo scripts and manually update them. Don't forget to
-update any year references in `update_hmda_explorer.sh` as well.
-
-Why not include years as a command-line argument or env variable and have it all
-work automagically? Well, for the 2014 update we decided to change all the
-homepage charts to use states instead of counties. This meant a total rewrite
-of the charts. We also significantly changed the map legend. Next year, who
-knows what UI changes we'll want to make. So, these scripts aren't a cure-all -- 
-they're just a starting point. With each yearly update they'll need to be
-tweaked and improved.
-
-TileMill has been discontinued. At some point we should port the map files over to
-[MapBox Studio](https://www.mapbox.com/mapbox-studio/). TileMill works fine for
-now because we're not creating any new maps.
+Use the new map ids to update [`home.js`](https://github.com/cfpb/hmda-explorer/blob/master/src/static/js/pages/home.js#L37)
 
 ----
 
