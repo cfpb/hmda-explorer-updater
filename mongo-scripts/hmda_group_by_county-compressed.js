@@ -1,9 +1,9 @@
 // We're compressing the keys because TileMill sometimes truncates them and gets confused.
 // They're in the format: loanpurpose_actiontaken_year. For example:
 //
-// p_a_y0 is purchase applications in 2013.
-// p_o_y0 is purchase originations in 2013.
-// r_a_y0 is refinance applications in 2013.
+// p_a_y0 is purchase applications in 2014.
+// p_o_y0 is purchase originations in 2014.
+// r_a_y0 is refinance applications in 2014.
 //
 
 db.hmda_lar_by_county.drop();
@@ -16,7 +16,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2013 ] },
+                      { "$eq": [ "$da", 2014 ] },
                       { "$eq": [ "$809", 1 ] },
                       { "$eq": [ "$25", 1 ] },
                       { "$eq": [ "$a14", 1 ] },
@@ -31,7 +31,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2013 ] },
+                      { "$eq": [ "$da", 2014 ] },
                       { "$eq": [ "$fb", 1 ] },
                       { "$eq": [ "$809", 1 ] },
                       { "$eq": [ "$25", 1 ] },
@@ -47,7 +47,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2014 ] },
+                      { "$eq": [ "$da", 2015 ] },
                       { "$eq": [ "$809", 1 ] },
                       { "$eq": [ "$25", 1 ] },
                       { "$eq": [ "$a14", 1 ] },
@@ -62,7 +62,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2014 ] },
+                      { "$eq": [ "$da", 2015 ] },
                       { "$eq": [ "$fb", 1 ] },
                       { "$eq": [ "$809", 1 ] },
                       { "$eq": [ "$25", 1 ] },
@@ -78,7 +78,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2015 ] },
+                      { "$eq": [ "$da", 2016 ] },
                       { "$eq": [ "$809", 1 ] },
                       { "$eq": [ "$25", 1 ] },
                       { "$eq": [ "$a14", 1 ] },
@@ -93,7 +93,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2015 ] },
+                      { "$eq": [ "$da", 2016 ] },
                       { "$eq": [ "$fb", 1 ] },
                       { "$eq": [ "$809", 1 ] },
                       { "$eq": [ "$25", 1 ] },
@@ -109,7 +109,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2013 ] },
+                      { "$eq": [ "$da", 2014 ] },
                       { "$eq": [ "$809", 3 ] },
                       { "$eq": [ "$25", 1 ] },
                       { "$eq": [ "$a14", 1 ] },
@@ -124,7 +124,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2013 ] },
+                      { "$eq": [ "$da", 2014 ] },
                       { "$eq": [ "$fb", 1 ] },
                       { "$eq": [ "$809", 3 ] },
                       { "$eq": [ "$25", 1 ] },
@@ -140,7 +140,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2014 ] },
+                      { "$eq": [ "$da", 2015 ] },
                       { "$eq": [ "$809", 3 ] },
                       { "$eq": [ "$25", 1 ] },
                       { "$eq": [ "$a14", 1 ] },
@@ -155,7 +155,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2014 ] },
+                      { "$eq": [ "$da", 2015 ] },
                       { "$eq": [ "$fb", 1 ] },
                       { "$eq": [ "$809", 3 ] },
                       { "$eq": [ "$25", 1 ] },
@@ -171,7 +171,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2015 ] },
+                      { "$eq": [ "$da", 2016 ] },
                       { "$eq": [ "$809", 3 ] },
                       { "$eq": [ "$25", 1 ] },
                       { "$eq": [ "$a14", 1 ] },
@@ -186,7 +186,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$da", 2015 ] },
+                      { "$eq": [ "$da", 2016 ] },
                       { "$eq": [ "$fb", 1 ] },
                       { "$eq": [ "$809", 3 ] },
                       { "$eq": [ "$25", 1 ] },

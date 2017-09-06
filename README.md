@@ -11,7 +11,7 @@ These scripts assume you have:
 containing umpteen million HMDA LAR documents.
 - A free [Census API key](http://api.census.gov/data/key_signup.html).
 - GDAL, MongoDB, jq and iconv installed on a *nix machine.
-- ~~[TileMill](https://github.com/mapbox/tilemill)~~ [TileOven](https://github.com/florianf/tileoven) installed locally.
+- [TileMill](https://github.com/mapbox/tilemill) installed locally.
 
 **Note:** These scripts will not do all the work for you. They just automate
 some of the more tedious aspects (notably, the flattening of HMDA LAR data using
