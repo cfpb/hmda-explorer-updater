@@ -197,8 +197,12 @@ start "Add state names to the HMDA chart records"
 ($MONGO mongo-scripts/add_state_names_to_charts.js)
 check $?
 
+# [.[] | select(.state_name)] => Make sure the array only contains objects with
+# `state_name` keys
+
 start "Exporting the JSON for chart #1"
-($MONGO_EXPORT --collection hmda_lar_by_state --jsonArray) | jq 'map(
+($MONGO_EXPORT --collection hmda_lar_by_state --jsonArray) | \
+  jq '[.[] | select(.state_name)] | map(
   {
     (.state_name): {
       name: (.state_name), data: [
@@ -212,7 +216,8 @@ start "Exporting the JSON for chart #1"
 check $?
 
 start "Exporting the JSON for chart #2"
-($MONGO_EXPORT --collection hmda_lar_by_state --jsonArray) | jq 'map(
+($MONGO_EXPORT --collection hmda_lar_by_state --jsonArray) | \
+  jq '[.[] | select(.state_name)] | map(
   {
     (.state_name): {
       name: (.state_name), data: [
