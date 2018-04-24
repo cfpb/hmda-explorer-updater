@@ -14,8 +14,8 @@
 #
 # Get a Census API key from: http://api.census.gov/data/key_signup.html
 #
-# This script is designed to run against the dev mongo server. Ask the Delivery 
-# Team for its address and port. You'll also need an account that's authorized 
+# This script is designed to run against the dev mongo server. Ask the Delivery
+# Team for its address and port. You'll also need an account that's authorized
 # to run aggregations and edit collections in the `hmda` database.
 #
 # You must also have GDAL, MongoDB, jq and iconv installed. On Mac OS X you can do:
@@ -112,7 +112,7 @@ mongo $reporting $MONGO_DEV_HOST:$MONGO_DEV_PORT/hmda -u $MONGO_DEV_USERNAME -p 
 check $?
 
 start "Downloading and processing state population data from the census"
-curl -s "http://api.census.gov/data/2010/sf1?key=$CENSUS_API_KEY&get=P0010001,NAME&for=state:*" | jq '.[1:] | map({population:.[0], state_name:.[1], state_code:.[2]})' > input/tmp/state-populations.json
+curl -s "https://api.census.gov/data/2010/sf1?key=$CENSUS_API_KEY&get=P0010001,NAME&for=state:*" | jq '.[1:] | map({population:.[0], state_name:.[1], state_code:.[2]})' > input/tmp/state-populations.json
 check $?
 
 start "Processing county population data from the census"
@@ -142,7 +142,7 @@ check $?
 # Now that you have a comprehensive `hmda_lar_by_county` collection, let's integrate the county shapefiles.
 
 start "Downloading and unzipping county shapefiles from the Census"
-curl -s http://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_county_500k.zip | tar -xf- -C input/tmp
+curl -s https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_county_500k.zip | tar -xf- -C input/tmp
 check $?
 
 start "Converting the census' shapefile into a GeoJSON file"
@@ -178,7 +178,7 @@ if [ -f input/tmp/hmda_lar_geo.json ]; then
   println_normal "TileMill project files have been successfully generated!"
 else
   println_alert "'hmda_lar_geo.json' was not successfully created. Something went wrong!"
-fi 
+fi
 
 # All done with the map stuff. Now let's generate the JSON for the charts.
 
