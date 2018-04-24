@@ -63,4 +63,4 @@ fs.writeFile('./output/chart1.json', processChart(chart1), function(err) {
 
 fs.writeFile('./output/chart2.json', processChart(chart2, true), function(err) {
   if (err) console.error('There was a problem saving the second chart\'s data.');
-}); 
+});
