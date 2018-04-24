@@ -121,7 +121,7 @@ curl -s "https://api.census.gov/data/2010/sf1?key=$CENSUS_API_KEY&get=P0010001,N
 check $?
 
 start "Processing county population data from the census"
-iconv --from-code iso-8859-1 input/census_data/PEP_2016_PEPANNRES/PEP_2016_PEPANNRES_with_ann.csv | jq --slurp --raw-input 'split("\n") | .[2:] | map(split(",")) | map({state_code: .[0][9:11], county_code: .[0][11:], county_name: (.[2]|ltrimstr("\"")), state_name: (.[3]|rtrimstr("\"")|ltrimstr(" ")), population: (.[11]|rtrimstr("\r"))})' > input/tmp/county-populations.json
+iconv --from-code iso-8859-1 input/census_data/PEP_2017_PEPANNRES/PEP_2017_PEPANNRES_with_ann.csv | jq --slurp --raw-input 'split("\n") | .[2:] | map(split(",")) | map({state_code: .[0][9:11], county_code: .[0][11:], county_name: (.[2]|ltrimstr("\"")), state_name: (.[3]|rtrimstr("\"")|ltrimstr(" ")), population: (.[11]|rtrimstr("\r"))})' > input/tmp/county-populations.json
 check $?
 
 start "Importing state population data into new 'state_populations' collection"
@@ -147,16 +147,16 @@ check $?
 # Now that you have a comprehensive `hmda_lar_by_county` collection, let's integrate the county shapefiles.
 
 start "Downloading and unzipping county shapefiles from the Census"
-curl -s https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_county_500k.zip | tar -xf- -C input/tmp
+curl -s https://www2.census.gov/geo/tiger/GENZ2017/shp/cb_2017_us_county_500k.zip | tar -xf- -C input/tmp
 check $?
 
 start "Converting the census' shapefile into a GeoJSON file"
-rm -f input/tmp/cb_2016_us_county_500k.json
-ogr2ogr -f 'GeoJSON' input/tmp/cb_2016_us_county_500k.json input/tmp/cb_2016_us_county_500k.shp
+rm -f input/tmp/cb_2017_us_county_500k.json
+ogr2ogr -f 'GeoJSON' input/tmp/cb_2017_us_county_500k.json input/tmp/cb_2017_us_county_500k.shp
 check $?
 
 start "Cleaning up the GeoJSON file"
-cat input/tmp/cb_2016_us_county_500k.json | jq '.features' --compact-output > input/tmp/counties_geojson.json
+cat input/tmp/cb_2017_us_county_500k.json | jq '.features' --compact-output > input/tmp/counties_geojson.json
 check $?
 
 start "Importing the new 'counties_geojson.json' into a 'county_shapes' collection"

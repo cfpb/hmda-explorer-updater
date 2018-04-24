@@ -4,11 +4,11 @@ db.hmda_lar.aggregate([
   // { $limit: 1000000 },
   { "$group": {
       "_id": { state_code: "$state_code", county_code: "$county_code" },
-      "p_a_y0": { 
+      "p_a_y0": {
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2014 ] },
+                      { "$eq": [ "$as_of_year", 2015 ] },
                       { "$eq": [ "$loan_purpose", 1 ] },
                       { "$eq": [ "$lien_status", 1 ] },
                       { "$eq": [ "$owner_occupancy", 1 ] },
@@ -23,7 +23,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2014 ] },
+                      { "$eq": [ "$as_of_year", 2015 ] },
                       { "$eq": [ "$action_taken", 1 ] },
                       { "$eq": [ "$loan_purpose", 1 ] },
                       { "$eq": [ "$lien_status", 1 ] },
@@ -35,11 +35,11 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "p_a_y1": { 
+      "p_a_y1": {
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2015 ] },
+                      { "$eq": [ "$as_of_year", 2016 ] },
                       { "$eq": [ "$loan_purpose", 1 ] },
                       { "$eq": [ "$lien_status", 1 ] },
                       { "$eq": [ "$owner_occupancy", 1 ] },
@@ -54,7 +54,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2015 ] },
+                      { "$eq": [ "$as_of_year", 2016 ] },
                       { "$eq": [ "$action_taken", 1 ] },
                       { "$eq": [ "$loan_purpose", 1 ] },
                       { "$eq": [ "$lien_status", 1 ] },
@@ -66,11 +66,11 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "p_a_y2": { 
+      "p_a_y2": {
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2016 ] },
+                      { "$eq": [ "$as_of_year", 2017 ] },
                       { "$eq": [ "$loan_purpose", 1 ] },
                       { "$eq": [ "$lien_status", 1 ] },
                       { "$eq": [ "$owner_occupancy", 1 ] },
@@ -85,7 +85,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2016 ] },
+                      { "$eq": [ "$as_of_year", 2017 ] },
                       { "$eq": [ "$action_taken", 1 ] },
                       { "$eq": [ "$loan_purpose", 1 ] },
                       { "$eq": [ "$lien_status", 1 ] },
@@ -97,11 +97,11 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "r_a_y0": { 
+      "r_a_y0": {
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2014 ] },
+                      { "$eq": [ "$as_of_year", 2015 ] },
                       { "$eq": [ "$loan_purpose", 3 ] },
                       { "$eq": [ "$lien_status", 1 ] },
                       { "$eq": [ "$owner_occupancy", 1 ] },
@@ -116,7 +116,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2014 ] },
+                      { "$eq": [ "$as_of_year", 2015 ] },
                       { "$eq": [ "$action_taken", 1 ] },
                       { "$eq": [ "$loan_purpose", 3 ] },
                       { "$eq": [ "$lien_status", 1 ] },
@@ -128,11 +128,11 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "r_a_y1": { 
+      "r_a_y1": {
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2015 ] },
+                      { "$eq": [ "$as_of_year", 2016 ] },
                       { "$eq": [ "$loan_purpose", 3 ] },
                       { "$eq": [ "$lien_status", 1 ] },
                       { "$eq": [ "$owner_occupancy", 1 ] },
@@ -147,7 +147,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2015 ] },
+                      { "$eq": [ "$as_of_year", 2016 ] },
                       { "$eq": [ "$action_taken", 1 ] },
                       { "$eq": [ "$loan_purpose", 3 ] },
                       { "$eq": [ "$lien_status", 1 ] },
@@ -159,11 +159,11 @@ db.hmda_lar.aggregate([
               ]
           }
       },
-      "r_a_y2": { 
+      "r_a_y2": {
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2016 ] },
+                      { "$eq": [ "$as_of_year", 2017 ] },
                       { "$eq": [ "$loan_purpose", 3 ] },
                       { "$eq": [ "$lien_status", 1 ] },
                       { "$eq": [ "$owner_occupancy", 1 ] },
@@ -178,7 +178,7 @@ db.hmda_lar.aggregate([
           "$sum": {
               "$cond": [
                   { "$and": [
-                      { "$eq": [ "$as_of_year", 2016 ] },
+                      { "$eq": [ "$as_of_year", 2017 ] },
                       { "$eq": [ "$action_taken", 1 ] },
                       { "$eq": [ "$loan_purpose", 3 ] },
                       { "$eq": [ "$lien_status", 1 ] },
