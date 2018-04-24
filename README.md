@@ -75,7 +75,7 @@ Executing `update_hmda_explorer.sh` will connect to your MongoDB server, do a
 bunch of stuff, and eventually generate two files and a directory to the
 `output` dir:
 
-- `output/chart1.json` 
+- `output/chart1.json`
 - `output/chart2.json`
 - `output/tilemill_projects`
 
@@ -97,19 +97,42 @@ configurable through the TileMill GUI. By default, TileMill stores projects in
 At this point the folders and the `name` attribute inside `project.mml` file should be changed to reflect the release years and conform to the existing naming convention.
 `hmda_r_o_y1_y2` => `hmda_r_o_18_19`
 
-Launch TileOven and verify the maps
+#### Updating the blank
+
+Use TileOven for the upload of the blank since the tooltip grid does not seem to be uploaded with TileMill
+
 ```shell
 cd ~/path/to/tileoven
+./index.js
+```
+
+The application is available at [http://localhost:20009/#/](http://localhost:20009/#/)
+
+Once the maps have been verified, export an `.mbtiles` file for the blank:
+- [ ] `hmda_blank_y2`
+
+**Note** you will have to save this file locally, and then upload it to Mapbox.
+Unfortunately, this will result in a random id being assigned, but this is necessary to have
+the tool tips show up
+
+#### Updating the other tilesets
+
+Launch TileMill and verify the maps
+```shell
+cd ~/path/to/tilemill
 ./index.js
 ```
 The application is available at [http://localhost:20009/#/](http://localhost:20009/#/)
 
 Once the maps have been verified, export an `.mbtiles` file for each of the following projects:
-- [ ] `hmda_blank`
 - [ ] `hmda_p_o_y1_y2`
 - [ ] `hmda_r_o_y1_y2`
 
-Upload the three `.mbtiles` files to [Mapbox Studio](https://www.mapbox.com/studio/tilesets/)
+Exporting the tilesets will automatically send them to Mapbox.
+
+#### Get the IDs
+
+Verify there are three new `.mbtiles` files are in [Mapbox Studio](https://www.mapbox.com/studio/tilesets/)
 
 Use the new map ids to update [`home.js`](https://github.com/cfpb/hmda-explorer/blob/master/src/static/js/pages/home.js#L37)
 
